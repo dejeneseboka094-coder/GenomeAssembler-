@@ -7,6 +7,7 @@ from src.assembler.cleaning import (
 )
 from src.assembler.traversal import find_contigs
 from src.assembler.assembly import write_fasta
+from src.assembler.evaluation import calculate_assembly_metrics
 
 
 def assemble(
@@ -38,8 +39,10 @@ def assemble(
 
     Returns
     -------
-    list[str]
-        Assembled contigs.
+    tuple
+        A tuple containing:
+        - contigs: assembled DNA sequences
+        - metrics: assembly statistics
     """
 
     if k <= 0:
@@ -78,4 +81,7 @@ def assemble(
     # Step 7: Write FASTA
     write_fasta(contigs, output_path)
 
-    return contigs
+    # Step 8: Calculate assembly metrics
+    metrics = calculate_assembly_metrics(contigs)
+
+    return contigs, metrics
