@@ -74,3 +74,16 @@ def read_fastq(path: str) -> Iterator[FastqRead]:
                 sequence=sequence,
                 quality=quality,
             )
+
+def read_paired_fastq(r1_path: str, r2_path: str):
+    """
+    Stream paired-end reads from two FASTQ files.
+
+    Reads from R1 and R2 are returned as pairs.
+    """
+
+    r1_reads = read_fastq(r1_path)
+    r2_reads = read_fastq(r2_path)
+
+    for read1, read2 in zip(r1_reads, r2_reads):
+        yield read1, read2
