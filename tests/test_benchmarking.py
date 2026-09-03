@@ -1,0 +1,18 @@
+from src.assembler.benchmarking import benchmark_assembly
+
+
+def test_benchmark_assembly():
+    def dummy_assembly():
+        return ["ATGC", "CGTA"]
+
+    result, metrics = benchmark_assembly(dummy_assembly)
+
+    assert result == ["ATGC", "CGTA"]
+
+    assert "execution_time_seconds" in metrics
+    assert "memory_used_bytes" in metrics
+    assert "memory_used_mb" in metrics
+
+    assert metrics["execution_time_seconds"] >= 0
+    assert metrics["memory_used_bytes"] >= 0
+    assert metrics["memory_used_mb"] >= 0
