@@ -10,13 +10,9 @@ def test_benchmark_assembly():
     assert result == ["ATGC", "CGTA"]
 
     assert "execution_time_seconds" in metrics
-    assert "memory_used_bytes" in metrics
-    assert "memory_used_mb" in metrics
-    assert "peak_memory_kb" in metrics
+    assert "peak_memory_bytes" in metrics
     assert "peak_memory_mb" in metrics
 
     assert metrics["execution_time_seconds"] >= 0
-    assert metrics["memory_used_bytes"] >= 0
-    assert metrics["memory_used_mb"] >= 0
-    assert metrics["peak_memory_kb"] >= 0
-    assert metrics["peak_memory_mb"] >= 0
+    assert metrics["peak_memory_bytes"] > 0
+    assert metrics["peak_memory_mb"] > 0
