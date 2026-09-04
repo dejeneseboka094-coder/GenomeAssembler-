@@ -12,7 +12,7 @@ def filter_low_coverage_edges(graph, min_coverage: int):
                 edges_to_remove.append((source, target))
 
     for source, target in edges_to_remove:
-        del graph.adjacency[source][target]
+        graph.remove_edge(source, target)
 
     return graph
 
@@ -101,7 +101,7 @@ def remove_tips(graph, max_length: int):
 
     for source, target in edges_to_remove:
         if target in graph.adjacency.get(source, {}):
-            del graph.adjacency[source][target]
+            graph.remove_edge(source, target)
 
     return graph
 

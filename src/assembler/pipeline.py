@@ -1,4 +1,4 @@
-from src.assembler.fastq import read_fastq
+from src.assembler.fastq import read_fastq, read_paired_fastq
 from src.assembler.kmer import count_kmers
 from src.assembler.graph import build_debruijn_graph
 from src.assembler.cleaning import (
@@ -16,6 +16,7 @@ def assemble(
     k,
     min_coverage=2,
     tip_length=2,
+    input_path_r2=None,
 ):
     """
     Run the complete genome assembly pipeline.
@@ -23,26 +24,17 @@ def assemble(
     Parameters
     ----------
     input_path : str
-        Input FASTQ file.
-
+        R1 FASTQ file.
     output_path : str
         Output FASTA file.
-
     k : int
         k-mer size.
-
-    min_coverage : int, default=2
-        Minimum k-mer coverage retained in the graph.
-
-    tip_length : int, default=2
-        Maximum length of removable tips.
-
-    Returns
-    -------
-    tuple
-        A tuple containing:
-        - contigs: assembled DNA sequences
-        - metrics: assembly statistics
+    min_coverage : int
+        Minimum k-mer coverage to retain.
+    tip_length : int
+        Maximum removable tip length.
+    input_path_r2 : str or None
+        Optional R2 FASTQ file for paired-end data.
     """
 
     if k <= 0:
@@ -54,34 +46,46 @@ def assemble(
     if tip_length < 1:
         raise ValueError("tip_length must be at least 1")
 
-    # Step 1: Read FASTQ
-    reads = read_fastq(input_path)
+    if input_path_r2 is None:
+        reads = read_fastq(input_path)
+    else:
+        paired_reads = read_paired_fastq(
+            input_path,
+            input_path_r2,
+        )
 
-    # Step 2: Count k-mers
+        reads = (
+            read
+            for pair in paired_reads
+            for read in pair
+        )
+
     kmer_counts = count_kmers(reads, k)
 
-    # Step 3: Build de Bruijn graph
-    graph = build_debruijn_graph(kmer_counts, k)
+    graph = build_debruijn_graph(
+        kmer_counts,
+        k,
+    )
 
-    # Step 4: Remove low-coverage edges
     filter_low_coverage_edges(
         graph,
         min_coverage=min_coverage,
     )
 
-    # Step 5: Remove short erroneous tips
     remove_tips(
         graph,
         max_length=tip_length,
     )
 
-    # Step 6: Traverse graph
     contigs = find_contigs(graph)
 
-    # Step 7: Write FASTA
-    write_fasta(contigs, output_path)
+    write_fasta(
+        contigs,
+        output_path,
+    )
 
-    # Step 8: Calculate assembly metrics
-    metrics = calculate_assembly_metrics(contigs)
+    metrics = calculate_assembly_metrics(
+        contigs
+    )
 
     return contigs, metrics
