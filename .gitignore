@@ -10,3 +10,6 @@ data/raw/
 
 data/simulated/Ecoli_test_R1.fastq
 data/simulated/Ecoli_test_R2.fastq
+
+data/simulated/Ecoli_test1000_R1.fastq
+data/simulated/Ecoli_test1000_R2.fastq
