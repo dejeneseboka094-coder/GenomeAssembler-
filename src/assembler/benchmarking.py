@@ -1,5 +1,4 @@
 import multiprocessing
-import os
 import time
 
 import psutil
@@ -16,10 +15,10 @@ def _run_assembly(assemble_function, args, kwargs, result_queue):
 
 def benchmark_assembly(assemble_function, *args, **kwargs):
     """
-    Measure execution time and peak memory usage of an assembly run.
+    Measure execution time and peak memory usage.
 
-    The assembly is executed in a separate process so that its
-    memory usage can be measured independently.
+    Assembly runs in a separate process so that its memory
+    usage can be measured independently.
     """
 
     result_queue = multiprocessing.Queue()
@@ -35,11 +34,9 @@ def benchmark_assembly(assemble_function, *args, **kwargs):
     )
 
     start_time = time.perf_counter()
-
     process.start()
 
     child = psutil.Process(process.pid)
-
     peak_memory_bytes = 0
 
     while process.is_alive():
@@ -52,11 +49,12 @@ def benchmark_assembly(assemble_function, *args, **kwargs):
         except psutil.NoSuchProcess:
             break
 
+        time.sleep(0.01)
+
     process.join()
 
     end_time = time.perf_counter()
 
-    # Capture final memory reading as well.
     try:
         memory = child.memory_info().rss
         peak_memory_bytes = max(
@@ -66,22 +64,20 @@ def benchmark_assembly(assemble_function, *args, **kwargs):
     except psutil.NoSuchProcess:
         pass
 
-    if not result_queue.empty():
-        status, result = result_queue.get()
-
-        if status == "error":
-            raise RuntimeError(
-                f"Assembly failed: {result}"
-            )
-    else:
+    try:
+        status, result = result_queue.get(timeout=5)
+    except Exception as error:
         raise RuntimeError(
             "Assembly process terminated without returning a result."
+        ) from error
+
+    if status == "error":
+        raise RuntimeError(
+            f"Assembly failed: {result}"
         )
 
-    execution_time = end_time - start_time
-
     metrics = {
-        "execution_time_seconds": execution_time,
+        "execution_time_seconds": end_time - start_time,
         "peak_memory_bytes": peak_memory_bytes,
         "peak_memory_mb": peak_memory_bytes / (1024 ** 2),
     }
