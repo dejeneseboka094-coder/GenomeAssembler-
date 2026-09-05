@@ -7,7 +7,10 @@ from src.assembler.cleaning import (
 )
 from src.assembler.traversal import find_contigs
 from src.assembler.assembly import write_fasta
-from src.assembler.evaluation import calculate_assembly_metrics
+from src.assembler.evaluation import (
+    calculate_assembly_metrics,
+    calculate_read_incorporation,
+)
 
 
 def assemble(
@@ -60,6 +63,7 @@ def assemble(
             for read in pair
         )
 
+        reads = list(reads)
     kmer_counts = count_kmers(reads, k)
 
     graph = build_debruijn_graph(
@@ -84,8 +88,9 @@ def assemble(
         output_path,
     )
 
-    metrics = calculate_assembly_metrics(
-        contigs
+    metrics = calculate_assembly_metrics(contigs)
+    metrics["read_incorporation_percentage"] = calculate_read_incorporation(
+        reads, contigs
     )
 
     return contigs, metrics

@@ -62,3 +62,40 @@ def calculate_assembly_metrics(contigs):
         "average_contig_length": sum(lengths) / len(lengths),
         "N50": calculate_n50(contigs),
     }
+
+
+def calculate_read_incorporation(reads, contigs):
+    """
+    Calculate the percentage of reads fully incorporated into contigs.
+
+    A read is considered incorporated if its complete sequence occurs
+    in at least one assembled contig.
+
+    Parameters
+    ----------
+    reads : iterable
+        FASTQ read objects with a ``sequence`` attribute.
+    contigs : iterable of str
+        Assembled contig sequences.
+
+    Returns
+    -------
+    float
+        Percentage of reads whose complete sequence is found in a contig.
+    """
+
+    reads = list(reads)
+    contigs = list(contigs)
+
+    if not reads:
+        return 0.0
+
+    incorporated = 0
+
+    for read in reads:
+        sequence = read.sequence.upper()
+
+        if any(sequence in contig for contig in contigs):
+            incorporated += 1
+
+    return (incorporated / len(reads)) * 100

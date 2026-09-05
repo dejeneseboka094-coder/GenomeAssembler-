@@ -15,6 +15,10 @@ def main():
         required=True,
         help="Input FASTQ file.",
     )
+    parser.add_argument(
+        "--input-r2",
+        help="Optional R2 FASTQ file for paired-end reads.",
+    )
 
     parser.add_argument(
         "--output",
@@ -51,6 +55,7 @@ def main():
         k=args.k,
         min_coverage=args.min_coverage,
         tip_length=args.tip_length,
+        input_path_r2=args.input_r2,
     )
 
     print("Assembly completed successfully.")

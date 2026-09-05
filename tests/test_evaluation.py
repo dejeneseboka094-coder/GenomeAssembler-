@@ -38,3 +38,23 @@ def test_empty_contigs():
     assert metrics["largest_contig"] == 0
     assert metrics["average_contig_length"] == 0
     assert metrics["N50"] == 0
+
+
+def test_calculate_read_incorporation():
+    from src.assembler.fastq import FastqRead
+    from src.assembler.evaluation import calculate_read_incorporation
+
+    reads = [
+        FastqRead("read1", "ATGCG", "IIIII"),
+        FastqRead("read2", "GCTAG", "IIIII"),
+        FastqRead("read3", "TTTTT", "IIIII"),
+    ]
+
+    contigs = [
+        "CCCATGCGGG",
+        "AAAGCTAGCCC",
+    ]
+
+    percentage = calculate_read_incorporation(reads, contigs)
+
+    assert percentage == (2 / 3) * 100

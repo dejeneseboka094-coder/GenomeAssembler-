@@ -34,3 +34,32 @@ def test_assemble_simulated_data(tmp_path):
     # Every returned contig should be present in FASTA
     for contig in contigs:
         assert contig in content
+
+def test_assemble_includes_read_incorporation(tmp_path):
+    from src.assembler.pipeline import assemble
+
+    input_file = tmp_path / "reads.fastq"
+    output_file = tmp_path / "contigs.fasta"
+
+    input_file.write_text(
+        "@read1\n"
+        "ATGCGATCG\n"
+        "+\n"
+        "IIIIIIIII\n"
+        "@read2\n"
+        "GATCGATGC\n"
+        "+\n"
+        "IIIIIIIII\n"
+    )
+
+    contigs, metrics = assemble(
+        str(input_file),
+        str(output_file),
+        k=5,
+        min_coverage=1,
+        tip_length=2,
+    )
+
+    assert isinstance(contigs, list)
+    assert "read_incorporation_percentage" in metrics
+    assert 0.0 <= metrics["read_incorporation_percentage"] <= 100.0
