@@ -5,7 +5,7 @@ import psutil
 
 
 def _run_assembly(assemble_function, args, kwargs, result_queue):
-    """Run assembly in a separate process."""
+    """Run the assembly function in a separate process."""
     try:
         result = assemble_function(*args, **kwargs)
         result_queue.put(("success", result))
@@ -15,37 +15,38 @@ def _run_assembly(assemble_function, args, kwargs, result_queue):
 
 def benchmark_assembly(assemble_function, *args, **kwargs):
     """
-    Measure execution time and peak memory usage.
+    Benchmark an assembly function.
 
-    Assembly runs in a separate process so that its memory
-    usage can be measured independently.
+    The assembly runs in a separate process so that its execution time
+    and peak resident memory usage can be measured independently.
+
+    Returns
+    -------
+    result : object
+        Return value produced by the assembly function.
+
+    metrics : dict
+        Execution time and peak memory statistics.
     """
 
     result_queue = multiprocessing.Queue()
 
     process = multiprocessing.Process(
         target=_run_assembly,
-        args=(
-            assemble_function,
-            args,
-            kwargs,
-            result_queue,
-        ),
+        args=(assemble_function, args, kwargs, result_queue),
     )
 
     start_time = time.perf_counter()
     process.start()
 
     child = psutil.Process(process.pid)
+
     peak_memory_bytes = 0
 
     while process.is_alive():
         try:
             memory = child.memory_info().rss
-            peak_memory_bytes = max(
-                peak_memory_bytes,
-                memory,
-            )
+            peak_memory_bytes = max(peak_memory_bytes, memory)
         except psutil.NoSuchProcess:
             break
 
@@ -55,14 +56,17 @@ def benchmark_assembly(assemble_function, *args, **kwargs):
 
     end_time = time.perf_counter()
 
+    # Capture the final RSS value if the process has not disappeared yet.
     try:
         memory = child.memory_info().rss
-        peak_memory_bytes = max(
-            peak_memory_bytes,
-            memory,
-        )
+        peak_memory_bytes = max(peak_memory_bytes, memory)
     except psutil.NoSuchProcess:
         pass
+
+    if process.exitcode != 0 and result_queue.empty():
+        raise RuntimeError(
+            f"Assembly process exited with code {process.exitcode}."
+        )
 
     try:
         status, result = result_queue.get(timeout=5)
@@ -72,9 +76,7 @@ def benchmark_assembly(assemble_function, *args, **kwargs):
         ) from error
 
     if status == "error":
-        raise RuntimeError(
-            f"Assembly failed: {result}"
-        )
+        raise RuntimeError(f"Assembly failed: {result}")
 
     metrics = {
         "execution_time_seconds": end_time - start_time,
