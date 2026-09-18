@@ -47,7 +47,7 @@ def test_assemble_includes_read_incorporation(tmp_path):
         "+\n"
         "IIIIIIIII\n"
         "@read2\n"
-        "GATCGATGC\n"
+        "ATGCGATCG\n"
         "+\n"
         "IIIIIIIII\n"
     )
@@ -62,4 +62,4 @@ def test_assemble_includes_read_incorporation(tmp_path):
 
     assert isinstance(contigs, list)
     assert "read_incorporation_percentage" in metrics
-    assert 0.0 <= metrics["read_incorporation_percentage"] <= 100.0
+    assert metrics["read_incorporation_percentage"] == 100.0

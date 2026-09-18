@@ -50,7 +50,7 @@ def assemble(
         raise ValueError("tip_length must be at least 1")
 
     if input_path_r2 is None:
-        reads = read_fastq(input_path)
+        reads = list(read_fastq(input_path))
     else:
         paired_reads = read_paired_fastq(
             input_path,
