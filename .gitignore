@@ -20,3 +20,5 @@ data/simulated/Ecoli_test10000_R1.fastq
 data/simulated/Ecoli_test10000_R2.fastq
 
 data/reference/
+data/simulated/Ecoli_test50000_R1.fastq
+data/simulated/Ecoli_test50000_R2.fastq
