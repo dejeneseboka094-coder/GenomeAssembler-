@@ -58,6 +58,7 @@ Contig generation
     |
     v
 Assembly evaluation
+```
 ## Repository Structure
 
 ```text
@@ -88,17 +89,41 @@ GenomeAssembler/
 BWA and SAMtools are required only for reference-based validation.
 
 ## Installation
+
+Clone the repository and enter the project directory:
+
+```bash
+git clone https://github.com/dejeneseboka094-coder/GenomeAssembler-.git
+cd GenomeAssembler-
+```
+
+Create a Python virtual environment:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+Install the required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Testing
 
 Run:
 
 ```bash
 pytest -q
-Current result:
+```
 
 ```text
 23 passed
-Command-Line Interface
+```
+
+## Command-Line Interface
+
 
 Single-End
 
